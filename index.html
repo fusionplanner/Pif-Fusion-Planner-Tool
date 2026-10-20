@@ -68,6 +68,15 @@ header.top h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 700; letter-
 header.top h1 .splice { color: var(--head); }
 header.top h1 .splice + .splice { color: var(--body); }
 .title-block p { margin: 0; color: var(--muted); max-width: 68ch; }
+.title-block p.soon {
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-self: start; margin-top: 4px;
+  padding: 5px 12px 5px 5px; border: 1px solid var(--body); border-radius: 999px; background: var(--body-soft);
+  color: var(--ink); font-weight: 700; font-size: 0.9rem;
+}
+.soon-tag {
+  padding: 2px 9px; border-radius: 999px; background: var(--body); color: var(--surface);
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+}
 .ai-note {
   display: grid; gap: 2px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px;
   background: var(--surface); font-size: 0.86rem; text-align: right; max-width: 48ch;
@@ -326,9 +335,10 @@ td.c { text-align: center; font-family: var(--mono); font-variant-numeric: tabul
     <div class="title-block">
       <h1><span class="splice">Infinite</span> <span class="splice">Fusion</span> Planner</h1>
       <p>Find the strongest team of fusions from the Pokémon you own.</p>
+      <p class="soon"><span class="soon-tag">Coming soon</span><span>Triple fusion planning</span></p>
     </div>
     <aside class="ai-note" aria-label="About how this tool was made">
-      <p>This tool was created with the use of Claude AI</p>
+      <p>This tool was created with the use of Claude AI Max</p>
       <p>Please do not use if you do not support AI</p>
     </aside>
   </header>

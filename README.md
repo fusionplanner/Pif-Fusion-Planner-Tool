@@ -41,4 +41,4 @@ Pokémon and all related names are trademarks of Nintendo, Creatures Inc. and Ga
 
 This is an unofficial fan tool. It is not affiliated with Nintendo, Game Freak, The Pokémon Company or the Infinite Fusion team, and it contains no game sprites, music or other assets.
 
-This tool was created with the use of Claude AI. Please do not use it if you do not support AI.
+This tool was created with the use of Claude AI Max. Please do not use it if you do not support AI.
