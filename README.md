@@ -2,7 +2,7 @@
 
 A free, unofficial team planner for **Pokémon Infinite Fusion** and **Infinite Fusion: Hoenn**.
 
-**Use it here:** https://rbradfordpal90-tech.github.io/Pif-fusion-planner/
+**Use it here:** https://fusionplanner.github.io/Pif-Fusion-Planner-Tool/
 
 Import your save (or add Pokémon by hand) and the planner tries every head/body pairing, then picks the best team of fusions, using each Pokémon once, and explains why.
 
