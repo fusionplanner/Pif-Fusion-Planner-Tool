@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Infinite Fusion Planner preview card</title>
+<!-- Source for og-image.png (the link preview picture). Render at 1200x630:
+     msedge --headless=new --window-size=1200,630 --screenshot=og-image.png og_card.html -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  :root { --bg: #0e1514; --surface: #162120; --ink: #e2ecea; --muted: #94a8a4; --line: #2a3e3b; --head: #52c4ca; --body: #f0a457; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: var(--bg); color: var(--ink); }
+  body { font-family: "Atkinson Hyperlegible", "Segoe UI", sans-serif; display: grid; grid-template-columns: 1fr 420px; }
+  .left { padding: 64px 0 56px 72px; display: grid; align-content: space-between; }
+  h1 { font-family: "Chakra Petch", "Segoe UI", sans-serif; font-size: 76px; line-height: 1; margin: 0; letter-spacing: 0.01em; }
+  h1 .a { color: var(--head); } h1 .b { color: var(--body); }
+  .pitch { font-size: 30px; line-height: 1.35; color: var(--ink); margin: 26px 0 0; max-width: 620px; }
+  ul { list-style: none; margin: 34px 0 0; padding: 0; display: grid; gap: 14px; font-size: 24px; color: var(--muted); }
+  li { display: flex; gap: 14px; align-items: center; }
+  li::before { content: ""; width: 12px; height: 12px; border-radius: 3px; background: var(--head); flex: none; }
+  li:nth-child(even)::before { background: var(--body); }
+  .url { font-size: 22px; color: var(--muted); letter-spacing: 0.02em; }
+  /* Right: a stylised head/body split, echoing the fusion rule (no game art) */
+  .right { position: relative; display: grid; place-items: center; }
+  .split { width: 300px; height: 300px; border-radius: 50%; position: relative; overflow: hidden; border: 4px solid var(--line); }
+  .split .h { position: absolute; inset: 0 0 50% 0; background: var(--head); }
+  .split .b { position: absolute; inset: 50% 0 0 0; background: var(--body); }
+  .split::after { content: ""; position: absolute; inset: 22%; border-radius: 50%; background: var(--bg); }
+  .tag { position: absolute; font-family: "Chakra Petch", sans-serif; font-weight: 700; font-size: 26px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .tag.h { top: 84px; color: var(--head); } .tag.b { bottom: 100px; color: var(--body); }
+  .stats { position: absolute; font-size: 18px; color: var(--muted); text-align: center; }
+  .stats.h { top: 120px; } .stats.b { bottom: 66px; }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div>
+      <h1><span class="a">Infinite</span> <span class="b">Fusion</span><br>Planner</h1>
+      <p class="pitch">Import your save. Get the strongest team of fusions, and why.</p>
+      <ul>
+        <li>Every head/body pairing scored on stats, typing and moves</li>
+        <li>Reads your party and PC boxes, right in your browser</li>
+        <li>Custom sprites with artist credits</li>
+      </ul>
+    </div>
+    <div class="url">fusionplanner.github.io/Pif-Fusion-Planner-Tool</div>
+  </div>
+  <div class="right">
+    <span class="tag h">Head</span>
+    <span class="stats h">HP · Sp. Atk · Sp. Def</span>
+    <div class="split"><div class="h"></div><div class="b"></div></div>
+    <span class="tag b">Body</span>
+    <span class="stats b">Attack · Defense · Speed</span>
+  </div>
+</body>
+</html>
