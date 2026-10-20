@@ -39,6 +39,8 @@ Pokémon Infinite Fusion and Infinite Fusion: Hoenn are made by **Chardub**, wit
 
 Pokémon and all related names are trademarks of Nintendo, Creatures Inc. and Game Freak.
 
-This is an unofficial fan tool. It is not affiliated with Nintendo, Game Freak, The Pokémon Company or the Infinite Fusion team, and it contains no game sprites, music or other assets.
+Custom fusion sprites are hand-drawn by the Infinite Fusion community. The page shows them from the community's sprite repository and credits the artist who drew each one; it doesn't include any game files itself.
+
+This is an unofficial fan tool. It is not affiliated with Nintendo, Game Freak, The Pokémon Company or the Infinite Fusion team.
 
 This tool was created with the use of Claude AI Max. Please do not use it if you do not support AI.
