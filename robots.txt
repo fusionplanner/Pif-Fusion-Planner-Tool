@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://fusionplanner.github.io/Pif-Fusion-Planner-Tool/sitemap.xml
