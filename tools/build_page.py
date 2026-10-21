@@ -226,8 +226,22 @@ def main():
         if mid in move_index:
             tm_names[move_index[mid]] = "/".join(sorted(names))
 
+    # Where to get TMs/HMs and which tutors teach what (from the game's map events)
+    loc_path = HERE / "locations.json"
+    if not loc_path.exists() or "--rescan" in sys.argv:
+        import subprocess
+        subprocess.run([sys.executable, "-I", str(HERE / "extract_locations.py"), str(game), str(loc_path)], check=False)
+    locs = json.loads(loc_path.read_text(encoding="utf-8")) if loc_path.exists() else {}
+    how_word = {"item": "Item", "gift": "Given", "shop": "Sold", "tutor": "Tutor"}
+    fmt = lambda e: f"{how_word.get(e['how'], e['how'])}: {e['where']}" + (" (Hoenn)" if e["game"] == "Hoenn" else "")
+    tm_where = {name: [fmt(e) for e in lst] for name, lst in locs.get("tm", {}).items()}
+    tutor_where = {}
+    for mid, lst in locs.get("tutor", {}).items():
+        if mid in move_index:
+            tutor_where[move_index[mid]] = [fmt(e) for e in lst]
+
     data = {"types": TYPES, "chart": chart, "moves": moves_out, "abilities": abil_used,
-            "species": out_species, "tmNames": tm_names}
+            "species": out_species, "tmNames": tm_names, "tmWhere": tm_where, "tutorWhere": tutor_where}
     payload = json.dumps(data, separators=(",", ":"), ensure_ascii=False).replace("</", "<\\/")
 
     settings = (game / "Data/Scripts/001_Settings.rb").read_text(encoding="utf-8")
@@ -283,7 +297,7 @@ def main():
     if not site_arg:
         tools = site / "tools"
         tools.mkdir(exist_ok=True)
-        for name in ("extract_pif_data.py", "build_page.py", "planner_template.html", "og_card.html"):
+        for name in ("extract_pif_data.py", "extract_locations.py", "build_page.py", "planner_template.html", "og_card.html"):
             (tools / name).write_bytes((HERE / name).read_bytes())
     print(f"Game {version}: {len(out_species)} species, {len(moves_out)} damaging moves, {len(abil_used)} abilities "
           f"-> {out.name} ({out.stat().st_size // 1024} KB) and {site / 'index.html'}")

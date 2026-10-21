@@ -92,6 +92,7 @@ header.top h1 .splice + .splice { color: var(--body); }
 /* Team style: segmented choice that wraps to 2x2 when narrow */
 .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .seg label { position: relative; }
+.seg label.wide { grid-column: 1 / -1; }
 .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
 .seg span {
   display: block; text-align: center; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
@@ -255,7 +256,19 @@ header.top h1 .splice + .splice { color: var(--body); }
 .moves { display: grid; gap: 4px; }
 .move { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; font-size: 0.9rem; }
 .move .p { font-family: var(--mono); font-size: 0.82rem; color: var(--muted); }
-.src { display: block; font-size: 0.76rem; color: var(--muted); }
+.src { display: block; position: relative; font-size: 0.76rem; color: var(--muted); }
+/* Move source: hover (desktop) or tap (phone) to see where to get it */
+.tip {
+  border: 0; background: transparent; padding: 0; font: inherit; color: var(--muted); cursor: help;
+  text-decoration: underline dotted; text-underline-offset: 2px;
+}
+.tip:hover, .tip:focus-visible { color: var(--head); }
+.tipbox {
+  display: none; position: absolute; z-index: 20; left: 0; top: calc(100% + 4px); width: max-content; max-width: min(300px, 80vw);
+  padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink);
+  font-size: 0.8rem; line-height: 1.4; box-shadow: 0 8px 24px rgb(0 0 0 / 0.25); white-space: normal;
+}
+.tip:hover + .tipbox, .tip:focus + .tipbox, .tipbox:hover { display: block; }
 .stab { font-size: 0.7rem; font-weight: 700; color: var(--head); letter-spacing: 0.06em; }
 .natsel { padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); max-width: 100%; }
 .matchups { display: flex; flex-wrap: wrap; gap: 4px 6px; }
@@ -391,14 +404,15 @@ td.c { text-align: center; font-family: var(--mono); font-variant-numeric: tabul
         </div>
         <div id="h-style" class="help" hidden>
           <p>Each fusion gets three scores from 0 to 100: <b>Stats</b> (attacking stat, bulk, Speed), <b>Typing</b> (weaknesses, resistances, immunities) and <b>Moves</b> (how hard its best four attacks hit across all types). The style decides how much each counts.</p>
-          <p><b>Best overall</b> counts all three equally. <b>Hard hitters</b> leans on stats and moves. <b>Bulky &amp; safe</b> leans on typing. <b>Custom</b> lets you set the balance; only the ratio matters, so 10/10/10 is the same as 1/1/1.</p>
+          <p><b>Best overall</b> counts all three equally. <b>Hard hitters</b> leans on stats and moves. <b>Bulky &amp; safe</b> leans on typing, including resistances. <b>Fewest weaknesses</b> only cares about avoiding weaknesses (a 4× weakness counts double) and steers the whole team away from weak spots. <b>Custom</b> lets you set the balance; only the ratio matters, so 10/10/10 is the same as 1/1/1.</p>
           <p>Many fusions score within a few points of each other, so switching styles can swap several picks.</p>
         </div>
         <div class="seg" role="radiogroup" aria-label="Team style">
           <label><input type="radio" name="preset" value="best" checked><span>Best overall</span></label>
           <label><input type="radio" name="preset" value="hard"><span>Hard hitters</span></label>
           <label><input type="radio" name="preset" value="bulky"><span>Bulky &amp; safe</span></label>
-          <label><input type="radio" name="preset" value="custom"><span>Custom</span></label>
+          <label><input type="radio" name="preset" value="fewest"><span>Fewest weaknesses</span></label>
+          <label class="wide"><input type="radio" name="preset" value="custom"><span>Custom</span></label>
         </div>
         <div id="customWeights" class="opts" hidden>
           <div class="slider"><label for="wStats">Stats</label><input id="wStats" type="range" min="0" max="10" value="5"><span id="wStatsV" class="num">5</span></div>
@@ -428,7 +442,7 @@ td.c { text-align: center; font-family: var(--mono); font-variant-numeric: tabul
           <button type="button" class="info" aria-expanded="false" aria-controls="h-opts" aria-label="What the options do">i</button>
         </div>
         <div id="h-opts" class="help" hidden>
-          <p><b>Evolved forms:</b> fusions evolve when either part does. Level evolutions wait for the fusion's level; stone and trade evolutions count right away. Branching lines like Eevee use whichever evolution fuses best.</p>
+          <p><b>Evolved forms:</b> fusions evolve when either part does. The planner tries every stage the fusion's level allows, including middle ones (Elekid, Electabuzz and Electivire), and uses whichever fuses best. Level evolutions wait for the level; stone and trade evolutions count right away. Every stage shows up under "Every pairing".</p>
           <p><b>Hidden abilities:</b> when off, only the two abilities a fusion normally gets are counted.</p>
           <p><b>Egg moves:</b> egg moves that also have a TM always count; this adds the rest.</p>
           <p><b>No repeats:</b> avoids the same species twice in a team, even if you own two. A Magikarp counts as the Gyarados it will become.</p>
@@ -749,6 +763,7 @@ function pickMoves(f, pool, abilityId) {
   return { chosen, raw: best.reduce((a, b) => a + b, 0) / T.length, se };
 }
 
+const weakPoints = mult => mult.reduce((s, m) => s + (m >= 4 ? 2 : m >= 2 ? 1 : 0), 0);
 function statsScore(stats, atkMult) {
   const atk = stats.atk * atkMult;
   const mainA = Math.max(atk, stats.spa), minA = Math.min(atk, stats.spa);
@@ -768,7 +783,8 @@ function evaluate(head, body, opts) {
     const atkMult = a.id === "HUGEPOWER" || a.id === "PUREPOWER" ? 2 : 1;
     const sStats = statsScore(f.stats, atkMult);
     const defp = defensiveProfile(f.types, a.id);
-    const sType = clamp01((defp.raw + 6) / 16) * 100;
+    // "Fewest weaknesses" scores typing on weaknesses only (4x counts double); otherwise resistances count too
+    const sType = opts.weakFocus ? clamp01(1 - weakPoints(defp.mult) / 6) * 100 : clamp01((defp.raw + 6) / 16) * 100;
     const mv = pickMoves(f, pool, a.id);
     const sMoves = clamp01((mv.raw - 50) / 200) * 100;
     const bonus = ABIL_BONUS[a.id] ? ABIL_BONUS[a.id][0] : 0;
@@ -829,11 +845,28 @@ function reachableForms(num) {
   walk(num);
   return out;
 }
-// Which forms to plan a Pokémon as: its "Plan as" choice, or automatic evolution by level
+// Every stage reachable by `level`, including the Pokémon itself and middle stages
+// (Elekid -> Electabuzz -> Electivire). Level evolutions wait for their level; stones/trades don't.
+const stageCache = new Map();
+function stagesUpTo(num, level) {
+  const ck = num + "@" + level;
+  if (stageCache.has(ck)) return stageCache.get(ck);
+  const out = [num], seen = new Set([num]);
+  const walk = n => {
+    for (const [m, , lvl] of SP.get(n).evo) {
+      if (seen.has(m) || (lvl != null && lvl > level)) continue;
+      seen.add(m); out.push(m); walk(m);
+    }
+  };
+  walk(num);
+  stageCache.set(ck, out);
+  return out;
+}
+// Which forms to plan a Pokémon as: its "Plan as" choice, or every stage its level allows
 function formsFor(u, opts) {
   if (u.evo === "none") return [u.num];
   if (typeof u.evo === "number") return [u.evo];
-  return opts.evolve ? finals(u.num, opts.level) : [u.num];
+  return opts.evolve ? stagesUpTo(u.num, opts.level) : [u.num];
 }
 
 // Best fusion of two Pokémon (u = { num, evo }), any allowed forms, either order
@@ -891,7 +924,9 @@ function dupCount(members) {
   return extra;
 }
 let dupPenalty = 12; // set from the "Avoid the same species twice" option in run()
-const teamValue = members => members.reduce((s, f) => s + f.overall, 0) + teamSynergy(members).value - dupPenalty * dupCount(members);
+let weakPenalty = 0; // "Fewest weaknesses": every weakness across the team costs points
+const teamValue = members => members.reduce((s, f) => s + f.overall, 0) + teamSynergy(members).value
+  - dupPenalty * dupCount(members) - weakPenalty * members.reduce((s, f) => s + weakPoints(f.defp.mult), 0);
 
 // Natures -------------------------------------------------------------------------
 const NATURES = [
@@ -1025,6 +1060,28 @@ function entryLine(e) {
   if (e.fusedFrom) bits.push(`now part of ${esc(e.fusedFrom)}`);
   return bits.length ? ` <span class="role">(${bits.join(", ")})</span>` : "";
 }
+// How to get a move: TM/HM locations and tutors come from the game's map events
+function howToGet(c) {
+  const i = c.m.i, src = c.src, lines = [];
+  if (/^Lv \d/.test(src)) return [`Learned by level-up: ${src}.`, "Missed it? The Move Relearner can teach it again."];
+  if (src.startsWith("Known from the start")) return [`${src}.`, "The Move Relearner can teach it again."];
+  if (src.startsWith("Egg move")) return [`${src}: comes from breeding, so the fusion needs a parent that already knows it.`];
+  if (TMN[i]) {
+    for (const name of TMN[i].split("/")) {
+      const w = (D.tmWhere || {})[name];
+      if (w && w.length) for (const x of w) lines.push(`${name} · ${x}`);
+      else lines.push(`${name}: not placed on any map (may be a reward, shop or event)`);
+    }
+  }
+  const tut = (D.tutorWhere || {})[i];
+  if (tut && tut.length) lines.push(...tut);
+  if (!lines.length) lines.push("Move tutor: location not found in the game's map data");
+  return lines;
+}
+function srcTip(c) {
+  const lines = howToGet(c);
+  return `<span class="src"><button type="button" class="tip" aria-label="How to get ${esc(c.m.name)}: ${esc(lines.join("; "))}">${esc(c.src)}</button><span class="tipbox" role="tooltip">${lines.map(esc).join("<br>")}</span></span>`;
+}
 function spriteBadge(f) {
   if (!SPRITES.size) return "";
   const v = f.sprite || spriteFor(f.head, f.body);
@@ -1123,7 +1180,7 @@ function cardHTML(f, eh, eb, ctx) {
     return `<option value="${n}"${n === chosen ? " selected" : ""}>${n}${x.plus ? ` (+${STAT_LABEL[x.plus]}, −${STAT_LABEL[x.minus]})` : " (neutral)"}${n === rec.name ? " ★" : ""}</option>`;
   }).join("");
   const abil = f.abilities.map(a => `<span${f.ability && a.id === f.ability.id ? ' style="font-weight:700"' : ""}>${esc(abName(a.id))}${a.hidden ? " <small>(hidden)</small>" : ""}</span>`).join(" · ");
-  const moves = f.mv.chosen.map(c => `<div class="move"><span>${esc(c.m.name)} ${c.stab ? '<span class="stab">STAB</span>' : ""}<span class="src">${esc(c.src)}</span></span>${typePill(c.m.type)}<span class="p">${c.m.pow} ${c.m.cat === 0 ? "phys" : "spec"}</span></div>`).join("") || `<span class="role">No damaging moves available at this level</span>`;
+  const moves = f.mv.chosen.map(c => `<div class="move"><span>${esc(c.m.name)} ${c.stab ? '<span class="stab">STAB</span>' : ""}${srcTip(c)}</span>${typePill(c.m.type)}<span class="p">${c.m.pow} ${c.m.cat === 0 ? "phys" : "spec"}</span></div>`).join("") || `<span class="role">No damaging moves available at this level</span>`;
   const m = f.defp.mult, weak = [], resists = [];
   m.forEach((v, a) => { if (v >= 4) weak.push(`<span class="bad num">${TYPE_NAME[a]} ×4</span>`); });
   m.forEach((v, a) => { if (v >= 2 && v < 4) weak.push(`<span class="bad num">${TYPE_NAME[a]} ×2</span>`); });
@@ -1298,7 +1355,7 @@ function restoreEntries(list) {
 const CHECKS = ["optEvolve", "optHidden", "optEgg", "optEV", "optSameLevel", "optNoDupes", "optSprites"];
 const VALUES = ["wStats", "wType", "wMoves", "optLevel"];
 // Team styles: relative weights for Stats / Typing / Moves
-const PRESETS = { best: { s: 1, t: 1, m: 1 }, hard: { s: 3, t: 1, m: 4 }, bulky: { s: 3, t: 4, m: 1 } };
+const PRESETS = { best: { s: 1, t: 1, m: 1 }, hard: { s: 3, t: 1, m: 4 }, bulky: { s: 3, t: 4, m: 1 }, fewest: { s: 2, t: 6, m: 2 } };
 const currentPreset = () => (document.querySelector('input[name="preset"]:checked') || { value: "best" }).value;
 function options() {
   const preset = currentPreset();
@@ -1306,6 +1363,7 @@ function options() {
     evolve: $("optEvolve").checked, hidden: $("optHidden").checked, egg: $("optEgg").checked,
     sameLevel: $("optSameLevel").checked, level: +$("optLevel").value, evs: $("optEV").checked,
     sprites: $("optSprites").checked,
+    weakFocus: preset === "fewest",
     weights: preset === "custom" ? { s: +$("wStats").value, t: +$("wType").value, m: +$("wMoves").value } : PRESETS[preset] || PRESETS.best,
   };
 }
@@ -1471,6 +1529,7 @@ function run() {
   for (const k of ["wStats", "wType", "wMoves", "optLevel"]) $(k + "V").textContent = $(k).value;
   $("levelRow").hidden = !$("optSameLevel").checked;
   dupPenalty = $("optNoDupes").checked ? 12 : 0;
+  weakPenalty = currentPreset() === "fewest" ? 3 : 0;
   {
     $("customWeights").hidden = currentPreset() !== "custom";
     const ow = options().weights, w = [ow.s, ow.t, ow.m], sum = w[0] + w[1] + w[2];
