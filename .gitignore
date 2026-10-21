@@ -1,5 +1,6 @@
 # Generated from the game files when rebuilding
 tools/pif1.json
+tools/locations.json
 tools/Fusion Planner.html
 tools/github/
 __pycache__/
